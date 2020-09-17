@@ -11,44 +11,68 @@ const createUserToken = (userId) => {
 	return jwt.sign({ id: userId }, secretKey, { expiresIn: "1d" });
 };
 
+/*
+200 ok
+201 created
+202 accepted
+
+400 bad request
+401 unauthorized  --temporary
+403 forbidden  --permanent
+404 not found
+
+500 internal server error
+501 not implemented
+503 service unavailable
+
+*/
+
 router.get("/", async (req, res) => {
 	try {
 		const users = await Users.find({});
 		return res.send(users);
 	} catch (err) {
-		return res.send({ error: `Erro ao consultar usuários: ${err}` });
+		return res
+			.status(500)
+			.send({ error: `Erro ao consultar usuários: ${err}` });
 	}
 });
 
 router.post("/create", async (req, res) => {
 	const { email, password } = req.body;
-	if (!email || !password) return res.send({ message: `Dados insuficientes!` });
+	if (!email || !password)
+		return res.status(400).send({ message: `Dados insuficientes!` });
 
 	try {
 		if (await Users.findOne({ email }))
-			return res.send({ message: `Email já registrado!` });
+			return res.status(400).send({ message: `Email já registrado!` });
 
 		const user = await Users.create(req.body);
-		data.password = undefined;
-		return res.send(user);
+		user.password = undefined;
+		return res.status(201).send(user);
 	} catch (err) {
-		if (err) return res.send({ error: `find: ${err}` });
+		if (err) return res.status(500).send({ error: `find: ${err}` });
 	}
 });
 
 router.post("/auth", async (req, res) => {
 	const { email, password } = req.body;
-	if (!email || !password) return res.send({ message: `Dados insuficientes!` });
+	if (!email || !password)
+		return res.status(400).send({ message: `Dados insuficientes!` });
 	try {
 		const user = await Users.findOne({ email }).select("password");
-		if (!user) return res.send({ message: `Usuário não registrado!` });
+		if (!user)
+			return res.status(400).send({ message: `Usuário não registrado!` });
 
 		if (!(await bcrypt.compare(password, user.password)))
-			return res.send({ nop: "Senha incorreta!" });
+			return res.status(401).send({ nop: "Senha incorreta!" });
 		user.password = undefined;
 		return res.send({ ok: user, token: createUserToken(email) });
 	} catch (err) {
-		if (err) return res.send({ error: `Erro ao autenticar o usuário: ${err}` });
+		if (err)
+			return res
+				.status(500)
+				.send({ error: `Erro ao autenticar o usuário: ${err}` });
 	}
 });
 
