@@ -3,7 +3,8 @@ const app = express();
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 
-const uri = require("./atlas_uri");
+const { uri } = require("./_vars_env");
+
 const options = {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
