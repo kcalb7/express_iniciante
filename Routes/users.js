@@ -4,46 +4,45 @@ const router = express.Router();
 
 const Users = require("../model/user");
 
-router.get("/", (req, res) => {
-	Users.find({}, (err, data) => {
-		if (err) return res.send({ error: `find: ${err}` });
-		return res.send({ users: data });
-	});
+router.get("/", async (req, res) => {
+	try {
+		const users = await Users.find({});
+		return res.send(users);
+	} catch (err) {
+		return res.send({ error: `Erro ao consultar usuários: ${err}` });
+	}
 });
 
-router.post("/create", (req, res) => {
+router.post("/create", async (req, res) => {
 	const { email, password } = req.body;
-	if (!email || !password) return res.send({ msg: `Dados insuficientes` });
+	if (!email || !password) return res.send({ msg: `Dados insuficientes!` });
 
-	Users.findOne({ email }, (err, data) => {
+	try {
+		if (await Users.findOne({ email }))
+			return res.send({ msg: `Email já registrado!` });
+
+		const user = await Users.create(req.body);
+		data.password = undefined;
+		return res.send(user);
+	} catch (err) {
 		if (err) return res.send({ error: `find: ${err}` });
-		if (data) return res.send({ msg: `Email já registrado` });
-
-		Users.create(req.body, (err, data) => {
-			if (err) return res.send({ error: `create: ${err}` });
-			data.password = undefined;
-			return res.send({ user: data });
-		});
-	});
+	}
 });
 
-router.post("/auth", (req, res) => {
+router.post("/auth", async (req, res) => {
 	const { email, password } = req.body;
+	if (!email || !password) return res.send({ msg: `Dados insuficientes!` });
+	try {
+		const user = await Users.findOne({ email }).select("password");
+		if (!user) return res.send({ msg: `Usuário não registrado!` });
 
-	if (!email || !password) return res.send({ msg: `Dados insuficientes` });
-
-	Users.findOne({ email }, (err, data) => {
-		if (err) return res.send({ error: `auth: ${err}` });
-		if (!data) return res.send({ msg: `Usuário não registrado!` });
-
-		bcrypt.compare(password, data.password, (err, same) => {
-			console.log(data);
-			if (err) return res.send({ error: "Erro ao autenticar o usuário" });
-			if (!same) return res.send({ nop: "usuário não autenticado" });
-			data.password = undefined;
-			return res.send({ ok: data });
-		});
-	}).select("password");
+		if (!(await bcrypt.compare(password, user.password)))
+			return res.send({ nop: "Senha incorreta!" });
+		user.password = undefined;
+		return res.send({ ok: user });
+	} catch (err) {
+		if (err) return res.send({ error: `Erro ao autenticar o usuário: ${err}` });
+	}
 });
 
 module.exports = router;
