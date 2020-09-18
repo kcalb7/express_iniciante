@@ -3,7 +3,8 @@ const app = express();
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 
-const { uri } = require("./_vars_env");
+const config = require("./config");
+const uri = config.BD_STRING;
 
 const options = {
 	useNewUrlParser: true,
@@ -18,10 +19,10 @@ mongoose.connection.on("error", (err) => {
 	console.log(`Erro na conexão com o banco de dados: ${err}`);
 });
 mongoose.connection.on("disconnected", () => {
-	console.log("Conexão encerrada");
+	console.log(".. disconnected");
 });
 mongoose.connection.on("connected", () => {
-	console.log("Conexão estabelecida");
+	console.log(".. connected");
 });
 
 app.use(bodyParser.urlencoded({ extended: false }));

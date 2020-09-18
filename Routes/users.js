@@ -4,14 +4,16 @@ const jwt = require("jsonwebtoken");
 
 const Users = require("../model/user");
 
-const { secretKey } = require("../_vars_env");
+const config = require("../config");
 
 // token
 const createUserToken = (userId) => {
-	return jwt.sign({ id: userId }, secretKey, { expiresIn: "1d" });
+	return jwt.sign({ id: userId }, config.JWT_SECRET_KEY, {
+		expiresIn: config.JWT_EXPIRES,
+	});
 };
 
-/*
+/* status codes
 200 ok
 201 created
 202 accepted
@@ -24,7 +26,6 @@ const createUserToken = (userId) => {
 500 internal server error
 501 not implemented
 503 service unavailable
-
 */
 
 router.get("/", async (req, res) => {

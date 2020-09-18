@@ -4,6 +4,5 @@ node_modules
 ### VS Code ###
 .vscode/
 
-
-### others ###
-_vars_env.js
+### config
+_userpass.js

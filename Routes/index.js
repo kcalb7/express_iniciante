@@ -10,7 +10,7 @@ router.get("/", auth, (req, res) => {
 });
 
 router.post("/", (req, res) => {
-	return res.send({ message: "Tudo ok com o métido POST da raiz!" });
+	return res.send({ message: "Tudo ok com o método POST da raiz!" });
 });
 
 module.exports = router;
