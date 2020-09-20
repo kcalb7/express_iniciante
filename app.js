@@ -33,6 +33,5 @@ const usersRoute = require("./Routes/users");
 app.use("/", indexRoute);
 app.use("/users", usersRoute);
 
-app.listen(3000);
-
+app.listen(process.env.PORT || 3000, () => console.log(".. server is running"));
 module.exports = app;

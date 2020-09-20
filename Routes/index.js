@@ -3,7 +3,7 @@ const router = require("express").Router();
 const auth = require("../middlewares/auth");
 
 router.get("/", auth, (req, res) => {
-	console.log(res.locals.auth_data);
+	console.log(`.. user authenticated: ${res.locals.auth_data}`);
 	return res.send({
 		message: "Informação permitida somente a usuário autenticado!",
 	});
